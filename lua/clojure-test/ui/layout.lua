@@ -49,6 +49,8 @@ function M.create_test_layout()
       left = top_left_popup,
       right = top_right_popup,
     },
+
+    last_active_window = vim.api.nvim_get_current_win(),
   }
 
   function TestLayout:mount()
@@ -57,6 +59,7 @@ function M.create_test_layout()
 
   function TestLayout:unmount()
     layout:unmount()
+    vim.api.nvim_set_current_win(TestLayout.last_active_window)
   end
 
   setup_quit_bindings(report_popup, TestLayout)
