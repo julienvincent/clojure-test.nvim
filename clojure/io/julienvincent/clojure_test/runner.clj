@@ -1,6 +1,6 @@
 (ns io.julienvincent.clojure-test.runner
   (:require
-   [clj-commons.format.exceptions :as ex]
+   [clj-commons.format.exceptions :as pretty.exceptions]
    [clojure.pprint :as pprint]
    [clojure.test :as test]))
 
@@ -18,30 +18,32 @@
     (with-out-str
       (pprint/pprint diff))))
 
+(defn- parse-exception [exception]
+  (mapv
+   (fn [{:keys [properties] :as ex}]
+     (let [props (when properties
+                   (with-out-str
+                     (pprint/pprint properties)))]
+       (if props
+         (assoc ex :properties props)
+         ex)))
+   (pretty.exceptions/analyze-exception exception {})))
+
 (defn- parse-report [report]
   (let [exception (when (instance? Throwable (:actual report))
-                    (ex/analyze-exception (:actual report) {}))
+                    (parse-exception (:actual report)))
 
-        report (cond-> report
+        report (cond-> (select-keys report [:type])
                  (:expected report)
                  (assoc :expected (parse-diff (:expected report)))
-
-                 (not (:expected report))
-                 (dissoc :expected)
 
                  (and (:actual report)
                       (not exception))
                  (assoc :actual (parse-diff (:actual report)))
 
-                 (not (:actual report))
-                 (dissoc :actual)
+                 exception (assoc :exception exception))]
 
-                 exception (assoc :exception exception)
-                 exception (dissoc :actual))]
-
-    (-> report
-        (assoc :context test/*testing-contexts*)
-        (dissoc :var :ns))))
+    (assoc report :context test/*testing-contexts*)))
 
 (defn run-test [test-sym]
   (binding [*report* (atom [])]
