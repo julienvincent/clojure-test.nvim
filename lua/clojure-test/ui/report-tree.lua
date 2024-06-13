@@ -39,16 +39,6 @@ local function assertion_to_line(assertion)
   return line
 end
 
-local function expectation_to_lines(expectation)
-  local lines = {}
-
-  for _, line in ipairs(vim.split(expectation, "\n")) do
-    table.insert(lines, { NuiText(line) })
-  end
-
-  return lines
-end
-
 local function assertion_to_node(assertion)
   local line = assertion_to_line(assertion)
 

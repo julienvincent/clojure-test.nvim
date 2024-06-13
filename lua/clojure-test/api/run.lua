@@ -26,14 +26,11 @@ function M.run_tests(tests)
   for _, test in ipairs(tests) do
     nio.run(function()
       semaphore.with(function()
-        local success, report = pcall(
-          eval.eval("user", "((requiring-resolve 'io.julienvincent.clojure-test.api/run-test-json) '" .. test .. ")").wait
-        )
-
-        if success then
+        local report = eval.eval(eval.API.run_test, "'" .. test)
+        if report then
           queue.put({
             test = test,
-            data = vim.json.decode(vim.json.decode(report)),
+            data = report,
           })
         end
       end)
