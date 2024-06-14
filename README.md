@@ -49,10 +49,20 @@ clojure_test.setup({
 
   -- list of default keybindings
   keys = {
+    run_all_tests = "<localleader>ta",
     run_tests = "<localleader>tr",
     run_tests_in_ns = "<localleader>tn",
     rerun_previous = "<localleader>tp",
     load_test_namespaces = "<localleader>tl",
+  },
+
+  hooks = {
+    -- This is a hook that will be called with a table of tests that are about to be run. This can be
+    -- used as an opportunity to safe files and/or reload clojure namespaces.
+    --
+    -- As an example, this combines really well with https://github.com/tonsky/clj-reload
+    before_run = function(tests)
+    end
   }
 })
 ```
