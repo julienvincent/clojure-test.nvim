@@ -13,11 +13,33 @@ local function setup_quit_bindings(popup, layout)
 end
 
 function M.create_test_layout()
-  local top_left_popup = Popup({ border = "rounded" })
-  local top_right_popup = Popup({ border = "rounded" })
+  local top_left_popup = Popup({
+    border = {
+      style = "rounded",
+      text = {
+        top = " Expected ",
+        top_align = "left",
+      },
+    },
+  })
+  local top_right_popup = Popup({
+    border = {
+      style = "rounded",
+      text = {
+        top = " Result ",
+        top_align = "left",
+      },
+    },
+  })
 
   local report_popup = Popup({
-    border = "rounded",
+    border = {
+      style = "rounded",
+      text = {
+        top = " Report ",
+        top_align = "left",
+      },
+    },
     enter = true,
     focusable = true,
   })
