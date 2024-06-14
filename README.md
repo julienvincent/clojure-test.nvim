@@ -28,7 +28,7 @@
 }
 ```
 
-Note that currently this requires adding a companion dependency to your repl:
+Note that currently this requires adding a companion dependency to your REPL:
 
 ```bash
 clojure -Sdeps '{:extra-deps {io.julienvincent/clojure-test {:mvn/version "0.0.1"} nrepl/nrepl {:mvn/version "1.0.0"} cider/cider-nrepl {:mvn/version "0.28.5"}}}' \
@@ -38,7 +38,7 @@ clojure -Sdeps '{:extra-deps {io.julienvincent/clojure-test {:mvn/version "0.0.1
 
 ## Project Status
 
-This is very **alpha software**. It's built for my personal use and I am developing it out as I go. Use at your own risk
+This is **very alpha software**. It's built for my personal use, and I am developing it out as I go. Use at your own risk.
 
 ## Configuration
 
@@ -57,10 +57,10 @@ clojure_test.setup({
   },
 
   hooks = {
-    -- This is a hook that will be called with a table of tests that are about to be run. This can be
-    -- used as an opportunity to safe files and/or reload clojure namespaces.
+    -- This is a hook that will be called with a table of tests that are about to be run. This
+    -- can be used as an opportunity to save files and/or reload clojure namespaces.
     --
-    -- As an example, this combines really well with https://github.com/tonsky/clj-reload
+    -- This combines really well with https://github.com/tonsky/clj-reload
     before_run = function(tests)
     end
   }

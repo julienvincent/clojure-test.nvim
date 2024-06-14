@@ -16,7 +16,7 @@ local function extract_ns_name(node)
     return
   end
 
-  if ts.get_node_text(ns_sym)[1] ~= "ns" then
+  if vim.treesitter.get_node_text(ns_sym, 0) ~= "ns" then
     return
   end
 
@@ -25,7 +25,7 @@ local function extract_ns_name(node)
     return
   end
 
-  return ts.get_node_text(ns)[1]
+  return vim.treesitter.get_node_text(ns, 0)
 end
 
 function M.get_current_namespace()
@@ -77,11 +77,11 @@ function M.get_test_at_cursor()
   end
 
   local form_type = root_form:named_child(0)
-  if ts.get_node_text(form_type)[1] ~= "deftest" then
+  if vim.treesitter.get_node_text(form_type, 0) ~= "deftest" then
     return
   end
 
-  local test_name = ts.get_node_text(root_form:named_child(1))[1]
+  local test_name = vim.treesitter.get_node_text(root_form:named_child(1), 0)
 
   if not test_name then
     return
