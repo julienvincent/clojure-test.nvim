@@ -3,6 +3,13 @@ local api = require("clojure-test.api")
 local M = {}
 
 function M.setup_keybindings(opts)
+  if opts.keys.run_all_tests then
+    vim.keymap.set("n", opts.keys.run_all_tests, api.run_all_tests, {
+      desc = "Run all tests",
+      silent = true,
+    })
+  end
+
   if opts.keys.run_tests then
     vim.keymap.set("n", opts.keys.run_tests, api.run_tests, {
       desc = "Run tests",

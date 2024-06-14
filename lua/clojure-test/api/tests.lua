@@ -12,11 +12,16 @@ function M.load_tests()
   eval.eval(eval.API.load_test_namespaces)
 end
 
-function M.select_tests(current_test)
+function M.get_all_tests()
   local tests = eval.eval(eval.API.get_all_tests)
   if not tests then
     return {}
   end
+  return tests
+end
+
+function M.select_tests(current_test)
+  local tests = M.get_all_tests()
 
   if current_test and utils.included_in_table(tests, current_test) then
     return { current_test }

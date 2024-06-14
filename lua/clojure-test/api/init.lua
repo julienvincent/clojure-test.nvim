@@ -9,6 +9,17 @@ M.state = {
   previous = nil,
 }
 
+function M.run_all_tests()
+  nio.run(function()
+    local tests = tests_api.get_all_tests()
+    if #tests == 0 then
+      return
+    end
+    M.state.previous = tests
+    run_api.run_tests(tests)
+  end)
+end
+
 function M.run_tests()
   nio.run(function()
     local current_test = location.get_test_at_cursor()
