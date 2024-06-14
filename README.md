@@ -49,11 +49,24 @@ clojure_test.setup({
 
   -- list of default keybindings
   keys = {
-    run_all_tests = "<localleader>ta",
-    run_tests = "<localleader>tr",
-    run_tests_in_ns = "<localleader>tn",
-    rerun_previous = "<localleader>tp",
-    load_test_namespaces = "<localleader>tl",
+    global = {
+      run_all_tests = "<localleader>ta",
+      run_tests = "<localleader>tr",
+      run_tests_in_ns = "<localleader>tn",
+      rerun_previous = "<localleader>tp",
+      load_test_namespaces = "<localleader>tl",
+    },
+
+    ui = {
+      expand_node = "l",
+      collapse_node = "h",
+      go_to = "<Cr>",
+
+      cycle_focus_forwards = "<Tab>",
+      cycle_focus_backwards = "<S-Tab>",
+
+      quit = { "<Esc>", "q" },
+    },
   },
 
   hooks = {

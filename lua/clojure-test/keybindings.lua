@@ -1,42 +1,29 @@
+local utils = require("clojure-test.utils")
 local api = require("clojure-test.api")
 
 local M = {}
 
-function M.setup_keybindings(opts)
-  if opts.keys.run_all_tests then
-    vim.keymap.set("n", opts.keys.run_all_tests, api.run_all_tests, {
-      desc = "Run all tests",
-      silent = true,
-    })
+local function setup_keybinding(key, action, description)
+  if not key then
+    return
   end
 
-  if opts.keys.run_tests then
-    vim.keymap.set("n", opts.keys.run_tests, api.run_tests, {
-      desc = "Run tests",
+  for _, chord in ipairs(utils.into_table(key)) do
+    vim.keymap.set("n", chord, action, {
+      desc = description,
       silent = true,
     })
   end
+end
 
-  if opts.keys.run_tests_in_ns then
-    vim.keymap.set("n", opts.keys.run_tests_in_ns, api.run_tests_in_ns, {
-      desc = "Run all tests in a namespace",
-      silent = true,
-    })
-  end
+function M.setup_keybindings(keys)
+  local global = keys.global
 
-  if opts.keys.rerun_previous then
-    vim.keymap.set("n", opts.keys.rerun_previous, api.rerun_previous, {
-      desc = "Rerun the last set of tests",
-      silent = true,
-    })
-  end
-
-  if opts.keys.load_test_namespaces then
-    vim.keymap.set("n", opts.keys.load_test_namespaces, api.load_tests, {
-      desc = "Load test namespaces in classpath",
-      silent = true,
-    })
-  end
+  setup_keybinding(global.run_all_tests, api.run_all_tests, "Run all tests")
+  setup_keybinding(global.run_tests, api.run_tests, "Run tests")
+  setup_keybinding(global.run_tests_in_ns, api.run_tests_in_ns, "Run all tests in a namespace")
+  setup_keybinding(global.rerun_previous, api.rerun_previous, "Rerun the last run set of tests")
+  setup_keybinding(global.load_test_namespaces, api.load_tests, "Find and load test namespaces in classpath")
 end
 
 return M

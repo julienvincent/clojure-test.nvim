@@ -23,9 +23,7 @@ local function statement(api, ...)
 end
 
 local function eval(ns, code)
-  local backend = config.config.backend
-
-  local result = backend.eval(ns, code)
+  local result = config.backend.eval(ns, code)
 
   -- nio.run(function()
   --   nio.sleep(20000)

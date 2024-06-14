@@ -1,4 +1,6 @@
 local exceptions = require("clojure-test.ui.exceptions")
+local config = require("clojure-test.config")
+local utils = require("clojure-test.utils")
 
 local NuiLine = require("nui.line")
 local NuiText = require("nui.text")
@@ -142,37 +144,43 @@ function M.create_tree(layout, on_enter_cb)
   })
 
   local map_options = { noremap = true, nowait = true }
-  window:map("n", "<Left>", function()
-    local node = tree:get_node()
 
-    if not node:has_children() or not node:is_expanded() then
-      local node_id = node:get_parent_id()
-      if node_id then
-        node = tree:get_node(node_id)
+  for _, chord in ipairs(utils.into_table(config.keys.ui.collapse_node)) do
+    window:map("n", chord, function()
+      local node = tree:get_node()
+
+      if not node:has_children() or not node:is_expanded() then
+        local node_id = node:get_parent_id()
+        if node_id then
+          node = tree:get_node(node_id)
+        end
       end
-    end
 
-    if node and node:collapse() then
-      tree:render()
-    end
-  end, map_options)
+      if node and node:collapse() then
+        tree:render()
+      end
+    end, map_options)
+  end
 
-  window:map("n", "<Right>", function()
-    local node = tree:get_node()
+  for _, chord in ipairs(utils.into_table(config.keys.ui.expand_node)) do
+    window:map("n", chord, function()
+      local node = tree:get_node()
+      if node:expand() then
+        tree:render()
+      end
+    end, map_options)
+  end
 
-    if node:expand() then
-      tree:render()
-    end
-  end, map_options)
+  for _, chord in ipairs(utils.into_table(config.keys.ui.go_to)) do
+    window:map("n", chord, function()
+      local node = tree:get_node()
+      if not node then
+        return
+      end
 
-  window:map("n", "<Cr>", function()
-    local node = tree:get_node()
-    if not node then
-      return
-    end
-
-    on_enter_cb(node)
-  end, map_options)
+      on_enter_cb(node)
+    end, map_options)
+  end
 
   local event = require("nui.utils.autocmd").event
 
