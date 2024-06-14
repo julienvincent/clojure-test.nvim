@@ -1,13 +1,7 @@
+local utils = require("clojure-test.utils")
+
 local NuiLine = require("nui.line")
 local NuiText = require("nui.text")
-
-local function reverse_table(source)
-  local reversed = {}
-  for i = #source, 1, -1 do
-    table.insert(reversed, source[i])
-  end
-  return reversed
-end
 
 local M = {}
 
@@ -17,7 +11,7 @@ function M.render_exception_to_buf(buf, exception_chain)
 
   local lines = {}
 
-  for _, ex in ipairs(reverse_table(exception_chain)) do
+  for _, ex in ipairs(utils.reverse_table(exception_chain)) do
     local exception_title = NuiLine()
     exception_title:append(ex["class-name"], "Error")
     exception_title:append(": ", "Comment")
