@@ -13,8 +13,16 @@ function M.render_exception_to_buf(buf, exception)
     local exception_title = NuiLine()
     exception_title:append(ex["class-name"], "Error")
     exception_title:append(": ", "Comment")
-    exception_title:append(ex["message"], "TSParameter")
+
+    local title_lines = vim.split(ex.message, "\n")
+    exception_title:append(title_lines[1], "TSParameter")
+
     table.insert(lines, exception_title)
+    table.remove(title_lines, 1)
+
+    for _, content in ipairs(title_lines) do
+      table.insert(lines, NuiLine({ NuiText(content, "TSParameter") }))
+    end
 
     local stack_trace = ex["stack-trace"]
     if stack_trace and stack_trace ~= vim.NIL then

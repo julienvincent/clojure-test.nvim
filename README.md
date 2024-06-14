@@ -20,7 +20,11 @@
   "julienvincent/clojure-test.nvim",
   config = function()
     require("clojure-test").setup()
-  end
+  end,
+  dependencies = {
+    { "nvim-neotest/nvim-nio" },
+    { "MunifTanjim/nui.nvim" }
+  }
 }
 ```
 
