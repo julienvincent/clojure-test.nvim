@@ -27,7 +27,6 @@ end
 local function assertion_to_line(assertion)
   local line = {}
 
-  table.insert(line, NuiText(" "))
   if assertion.type == "pass" then
     table.insert(line, NuiText(" ", "Green"))
     table.insert(line, NuiText("Pass"))
@@ -39,13 +38,32 @@ local function assertion_to_line(assertion)
   return line
 end
 
+local function exception_to_nodes(exception)
+  local nodes = {}
+  for _, ex in ipairs(exception) do
+    local line = {
+      NuiText(" ", "DiagnosticWarn"),
+      NuiText(ex["class-name"], "TSException"),
+    }
+
+    local node = NuiTree.Node({
+      line = line,
+      exception = ex,
+    })
+    table.insert(nodes, 1, node)
+  end
+  return nodes
+end
+
 local function assertion_to_node(assertion)
   local line = assertion_to_line(assertion)
+
+  local children = exception_to_nodes(assertion.exception or {})
 
   local node = NuiTree.Node({
     line = line,
     assertion = assertion,
-  })
+  }, children)
 
   if assertion.type ~= "pass" then
     node:expand()
@@ -98,15 +116,13 @@ function M.create_tree(layout)
     prepare_node = function(node)
       local line = NuiLine()
 
-      for _ = 1, node:get_depth() do
-        line:append(" ")
-      end
+      line:append(string.rep("  ", node:get_depth() - 1))
 
       if node:has_children() then
         if node:is_expanded() then
-          line:append("- ")
+          line:append(" ", "Comment")
         else
-          line:append("+ ")
+          line:append(" ", "Comment")
         end
       else
         line:append("  ")
@@ -159,6 +175,13 @@ function M.create_tree(layout)
         layout:show_left()
         write_clojure_to_buf(layout.windows.right.bufnr, node.assertion.actual)
       end
+    end
+
+    if node.exception then
+      write_clojure_to_buf(layout.windows.left.bufnr)
+
+      layout:hide_left()
+      exceptions.render_exception_to_buf(layout.windows.right.bufnr, { node.exception })
     end
   end, {})
 
