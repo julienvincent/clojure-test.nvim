@@ -55,7 +55,7 @@ local function exception_to_nodes(exception)
   return nodes
 end
 
-local function assertion_to_node(assertion)
+local function assertion_to_node(test, assertion)
   local line = assertion_to_line(assertion)
 
   local children = exception_to_nodes(assertion.exception or {})
@@ -63,6 +63,7 @@ local function assertion_to_node(assertion)
   local node = NuiTree.Node({
     line = line,
     assertion = assertion,
+    test = test,
   }, children)
 
   if assertion.type ~= "pass" then
@@ -77,10 +78,14 @@ local function report_to_node(report)
 
   local children = {}
   for _, assertion in ipairs(report.assertions) do
-    table.insert(children, assertion_to_node(assertion))
+    table.insert(children, assertion_to_node(report.test, assertion))
   end
 
-  local node = NuiTree.Node({ line = report_line }, children)
+  local node = NuiTree.Node({
+    line = report_line,
+    test = report.test,
+  }, children)
+
   if report.status == "failed" then
     node:expand()
   end
@@ -107,7 +112,7 @@ end
 
 local M = {}
 
-function M.create_tree(layout)
+function M.create_tree(layout, on_enter_cb)
   local window = layout.windows.tree
 
   local tree = NuiTree({
@@ -158,6 +163,15 @@ function M.create_tree(layout)
     if node:expand() then
       tree:render()
     end
+  end, map_options)
+
+  window:map("n", "<Cr>", function()
+    local node = tree:get_node()
+    if not node then
+      return
+    end
+
+    on_enter_cb(node)
   end, map_options)
 
   local event = require("nui.utils.autocmd").event

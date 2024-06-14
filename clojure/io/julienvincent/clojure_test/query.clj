@@ -72,3 +72,27 @@
 
 (defn get-all-tests []
   (mapcat get-tests-in-ns (get-test-namespaces)))
+
+(defn- namespace-to-file [sym]
+  (-> (str sym)
+      (str/replace #"\." "/")
+      (str/replace #"-" "_")
+      (str ".clj")))
+
+(defn resolve-metadata-for-symbol [sym]
+  (let [meta-info (if (qualified-symbol? sym)
+                    (meta (requiring-resolve sym))
+                    {:file (namespace-to-file sym)})
+        relative-path (:file meta-info)
+
+        file-path
+        (some
+         (fn [classpath-dir]
+           (let [file (File. classpath-dir relative-path)]
+             (when (.exists file)
+               (.getAbsolutePath file))))
+         (get-classpath))]
+
+    (when file-path
+      (-> (select-keys meta-info [:line :column])
+          (assoc :file file-path)))))

@@ -10,6 +10,8 @@ M.API = {
   get_tests_in_ns = "io.julienvincent.clojure-test.json/get-tests-in-ns",
 
   run_test = "io.julienvincent.clojure-test.json/run-test",
+
+  resolve_metadata_for_symbol = "io.julienvincent.clojure-test.json/resolve-metadata-for-symbol",
 }
 
 local function statement(api, ...)
