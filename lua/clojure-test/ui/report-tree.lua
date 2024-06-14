@@ -140,7 +140,7 @@ function M.create_tree(layout)
   window:map("n", "<Left>", function()
     local node = tree:get_node()
 
-    if not node:has_children() then
+    if not node:has_children() or not node:is_expanded() then
       local node_id = node:get_parent_id()
       if node_id then
         node = tree:get_node(node_id)
