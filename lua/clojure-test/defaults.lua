@@ -11,7 +11,10 @@ M.default_keys = {
 
 M.defaults = {
   use_default_keys = true,
+
   keys = {},
+
+  hooks = {},
 
   backend = backends.conjure,
 }

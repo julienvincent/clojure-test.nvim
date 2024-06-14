@@ -1,11 +1,17 @@
 local parser = require("clojure-test.api.report")
 local eval = require("clojure-test.api.eval")
+local config = require("clojure-test.config")
 local ui = require("clojure-test.ui")
 local nio = require("nio")
 
 local M = {}
 
 function M.run_tests(tests)
+  local hook = (config.config.hooks or {}).before_run
+  if hook then
+    hook(tests)
+  end
+
   local layout = ui.layout.create_test_layout()
 
   layout:mount()
