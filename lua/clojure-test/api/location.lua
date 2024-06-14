@@ -3,12 +3,16 @@ local ts = require("nvim-treesitter.ts_utils")
 local M = {}
 
 local function extract_ns_name(node)
+  if not node then
+    return
+  end
+
   if node:type() ~= "list_lit" then
     return
   end
 
   local ns_sym = node:named_child(0)
-  if ns_sym:type() ~= "sym_lit" then
+  if ns_sym and ns_sym:type() ~= "sym_lit" then
     return
   end
 
@@ -17,13 +21,20 @@ local function extract_ns_name(node)
   end
 
   local ns = node:named_child(1)
+  if not ns then
+    return
+  end
+
   return ts.get_node_text(ns)[1]
 end
 
 function M.get_current_namespace()
   local node = ts.get_node_at_cursor()
-  local tree = node:tree()
+  if not node then
+    return
+  end
 
+  local tree = node:tree()
   local document = tree:root()
 
   for i = 0, document:named_child_count() do
