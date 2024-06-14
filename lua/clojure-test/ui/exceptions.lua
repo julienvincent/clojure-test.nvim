@@ -1,15 +1,23 @@
 local NuiLine = require("nui.line")
 local NuiText = require("nui.text")
 
+local function reverse_table(source)
+  local reversed = {}
+  for i = #source, 1, -1 do
+    table.insert(reversed, source[i])
+  end
+  return reversed
+end
+
 local M = {}
 
-function M.render_exception_to_buf(buf, exception)
+function M.render_exception_to_buf(buf, exception_chain)
   vim.api.nvim_buf_set_option(buf, "filetype", "clojure")
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
 
   local lines = {}
 
-  for _, ex in ipairs(exception) do
+  for _, ex in ipairs(reverse_table(exception_chain)) do
     local exception_title = NuiLine()
     exception_title:append(ex["class-name"], "Error")
     exception_title:append(": ", "Comment")
