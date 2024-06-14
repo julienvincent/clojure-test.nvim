@@ -6,24 +6,38 @@
 
 (def ^:dynamic ^:private *report* nil)
 
+(defn- remove-commas
+  "Clojures pprint function adds commas in whitespace. This removes them while maintaining
+  any commas that are within strings"
+  [s]
+  (let [pattern #"(?<=^|[^\\])(\"(?:[^\"\\]|\\.)*\"|[^,\"]+)|(,)"
+        matches (re-seq pattern s)]
+    (apply str (map
+                (fn [[_ group1]]
+                  (or group1 ""))
+                matches))))
+
+(defn pretty-print [data]
+  (-> (with-out-str
+        (pprint/pprint data))
+      remove-commas))
+
 (defn- parse-diff [diff]
   (when-let [mc (requiring-resolve 'matcher-combinators.config/disable-ansi-color!)]
     (mc))
 
   (cond
     (= :matcher-combinators.clj-test/mismatch (:type (meta diff)))
-    (pr-str diff)
+    (-> diff pr-str remove-commas)
 
     :else
-    (with-out-str
-      (pprint/pprint diff))))
+    (pretty-print diff)))
 
 (defn- parse-exception [exception]
   (mapv
    (fn [{:keys [properties] :as ex}]
      (let [props (when properties
-                   (with-out-str
-                     (pprint/pprint properties)))]
+                   (pretty-print properties))]
        (if props
          (assoc ex :properties props)
          ex)))
