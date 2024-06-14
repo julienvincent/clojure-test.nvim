@@ -153,8 +153,10 @@ function M.create_tree(layout)
       write_clojure_to_buf(layout.windows.left.bufnr, node.assertion.expected)
 
       if node.assertion.exception then
+        layout:hide_left()
         exceptions.render_exception_to_buf(layout.windows.right.bufnr, node.assertion.exception)
       else
+        layout:show_left()
         write_clojure_to_buf(layout.windows.right.bufnr, node.assertion.actual)
       end
     end

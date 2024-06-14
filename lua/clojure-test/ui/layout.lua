@@ -22,24 +22,31 @@ function M.create_test_layout()
     focusable = true,
   })
 
-  local layout = Layout(
-    {
-      position = "50%",
-      relative = "editor",
-      size = {
-        width = 150,
-        height = 60,
-      },
-    },
+  local layout_side_by_side = Layout.Box({
     Layout.Box({
-      Layout.Box({
-        Layout.Box(top_left_popup, { size = "50%" }),
-        Layout.Box(top_right_popup, { size = "50%" }),
-      }, { dir = "row", size = "60%" }),
+      Layout.Box(top_left_popup, { grow = 1 }),
+      Layout.Box(top_right_popup, { grow = 1 }),
+    }, { dir = "row", size = "70%" }),
 
-      Layout.Box(report_popup, { size = "40%" }),
-    }, { dir = "col" })
-  )
+    Layout.Box(report_popup, { size = "30%" }),
+  }, { dir = "col" })
+
+  local layout_single = Layout.Box({
+    Layout.Box({
+      Layout.Box(top_right_popup, { grow = 1 }),
+    }, { dir = "row", size = "70%" }),
+
+    Layout.Box(report_popup, { size = "30%" }),
+  }, { dir = "col" })
+
+  local layout = Layout({
+    position = "50%",
+    relative = "editor",
+    size = {
+      width = 150,
+      height = 60,
+    },
+  }, layout_side_by_side)
 
   local TestLayout = {
     layout = layout,
@@ -55,6 +62,16 @@ function M.create_test_layout()
 
   function TestLayout:mount()
     layout:mount()
+  end
+
+  function TestLayout:hide_left()
+    top_left_popup:hide()
+    layout:update(layout_single)
+  end
+
+  function TestLayout:show_left()
+    top_left_popup:show()
+    layout:update(layout_side_by_side)
   end
 
   function TestLayout:unmount()

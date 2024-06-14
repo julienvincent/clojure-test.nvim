@@ -13,22 +13,21 @@ function M.render_exception_to_buf(buf, exception)
     local exception_title = NuiLine()
     exception_title:append(ex["class-name"], "Error")
     exception_title:append(": ", "Comment")
-    exception_title:append(ex["message"], "TSString")
+    exception_title:append(ex["message"], "TSParameter")
     table.insert(lines, exception_title)
 
     local stack_trace = ex["stack-trace"]
     if stack_trace and stack_trace ~= vim.NIL then
       for _, frame in ipairs(stack_trace) do
         if frame.name and frame.name ~= "" then
-          local vars = string.gsub(frame.name, frame.package .. ".", "")
-          local var_names = vim.split(vars, "/")
-          local var = var_names[1]
+          local namespace_and_names = vim.split(frame.name, "/")
+          local names = table.concat(namespace_and_names, "/", 2)
 
           local frame_line = NuiLine()
           frame_line:append("  ")
-          frame_line:append(frame.package, "TSNamespace")
-          frame_line:append(".", "TSNamespace")
-          frame_line:append(var, "TsMethodCall")
+          frame_line:append(namespace_and_names[1], "TSNamespace")
+          frame_line:append("/", "TSMethodCall")
+          frame_line:append(names, "TsMethodCall")
 
           if frame.line and frame.line ~= vim.NIL then
             frame_line:append(" @ ", "Comment")
