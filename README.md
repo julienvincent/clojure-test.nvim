@@ -45,8 +45,6 @@ This is **very alpha software**. It's built for my personal use, and I am develo
 ```lua
 local clojure_test = require("clojure-test")
 clojure_test.setup({
-  use_default_keys = true,
-
   -- list of default keybindings
   keys = {
     global = {
@@ -75,6 +73,39 @@ clojure_test.setup({
     --
     -- This combines really well with https://github.com/tonsky/clj-reload
     before_run = function(tests)
+    end
+  }
+})
+```
+
+## Reload namespaces before run
+
+A very useful configuration snippet is to set up a hook to save modified buffers and reload namespaces before running
+tests. This means that while you are working on changes you can just run the tests that cover your changes without
+having to go back and re-eval everything.
+
+This example makes use of [tonsky/clj-reload](https://github.com/tonsky/clj-reload) which ensures that namespaces are
+reloaded in the order they depend on each other. You can adapt this example to use whatever reload mechanism you wish.
+
+```lua
+require("clojure-test").setup({
+  hooks = {
+    before_run = function(_)
+      -- write all modified buffers
+      vim.api.nvim_command("wa")
+
+      local client = require("conjure.client")
+      local fn = require("conjure.eval")["eval-str"]
+
+      client["with-filetype"](
+        "clojure",
+        fn,
+        vim.tbl_extend("force", {
+          origin = "clojure_test.hooks.before_run",
+          context = "user",
+          code = [[ ((requiring-resolve 'clj-reload.core/reload)) ]],
+        }, opts)
+      )
     end
   }
 })

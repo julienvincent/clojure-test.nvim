@@ -129,8 +129,6 @@ function M.create_test_layout()
     },
 
     last_active_window = vim.api.nvim_get_current_win(),
-
-    is_left_visible = true,
   }
 
   function TestLayout:mount()
@@ -140,13 +138,11 @@ function M.create_test_layout()
   function TestLayout:hide_left()
     top_left_popup:hide()
     layout:update(layout_single)
-    TestLayout.is_left_visible = false
   end
 
   function TestLayout:show_left()
     top_left_popup:show()
     layout:update(layout_side_by_side)
-    TestLayout.is_left_visible = true
   end
 
   function TestLayout:unmount()
