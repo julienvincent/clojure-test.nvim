@@ -85,7 +85,7 @@ tests. This means that while you are working on changes you can just run the tes
 having to go back and re-eval everything.
 
 This example makes use of [tonsky/clj-reload](https://github.com/tonsky/clj-reload) which ensures that namespaces are
-reloaded in the order they depend on each other. You can adapt this example to use whatever reload mechanism you wish.
+reloaded in the order they depend on each other.
 
 ```lua
 require("clojure-test").setup({
@@ -96,16 +96,11 @@ require("clojure-test").setup({
 
       local client = require("conjure.client")
       local fn = require("conjure.eval")["eval-str"]
-
-      client["with-filetype"](
-        "clojure",
-        fn,
-        vim.tbl_extend("force", {
-          origin = "clojure_test.hooks.before_run",
-          context = "user",
-          code = [[ ((requiring-resolve 'clj-reload.core/reload)) ]],
-        }, opts)
-      )
+      client["with-filetype"]("clojure", fn, {
+        origin = "clojure_test.hooks.before_run",
+        context = "user",
+        code = [[ ((requiring-resolve 'clj-reload.core/reload)) ]],
+      })
     end
   }
 })

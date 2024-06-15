@@ -17,20 +17,45 @@
 
     (.startsWith child parent)))
 
+(defn- remove-overlapping-directories
+  "Remove overlapping paths from a given collection of directories, keeping 
+  the more specific path.
+   
+  Example:
+
+  ```clj
+  (remove-overlapping-directories #{\"/a\" \"/a/b\" \"/c\"})
+  ;; =>
+  #{\"/a/b\" \"/c\" }
+  ```"
+  [classpath]
+  (->> classpath
+       (sort-by identity (fn [left right]
+                           (compare (count left) (count right))))
+       (reduce
+        (fn [paths path]
+          (let [paths (filter
+                       (fn [existing]
+                         (not (is-parent existing path)))
+                       paths)]
+            (conj paths path)))
+        [])))
+
 (defn- get-classpath []
-  (into #{}
-        (comp
-         (filter (fn [path]
-                   (let [file ((requiring-resolve 'clojure.java.io/file) path)]
-                     (and (.exists file)
-                          (.isDirectory file)))))
-         (map (fn [path]
-                (->> (File. path)
-                     .getAbsolutePath
-                     str)))
-         (filter (fn [path]
-                   (is-parent (System/getProperty "user.dir") path))))
-        (str/split (System/getProperty "java.class.path") #":")))
+  (remove-overlapping-directories
+   (into #{}
+         (comp
+          (filter (fn [path]
+                    (let [file ((requiring-resolve 'clojure.java.io/file) path)]
+                      (and (.exists file)
+                           (.isDirectory file)))))
+          (map (fn [path]
+                 (->> (File. path)
+                      .getAbsolutePath
+                      str)))
+          (filter (fn [path]
+                    (is-parent (System/getProperty "user.dir") path))))
+         (str/split (System/getProperty "java.class.path") #":"))))
 
 (defn- find-test-files []
   (mapcat
