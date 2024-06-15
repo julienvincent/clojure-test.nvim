@@ -4,6 +4,50 @@ local eval = require("clojure-test.api.eval")
 local ui = require("clojure-test.ui")
 local nio = require("nio")
 
+local function go_to_test(layout, test)
+  local meta = eval.eval(eval.API.resolve_metadata_for_symbol, "'" .. test)
+  if not meta then
+    return
+  end
+
+  layout:unmount()
+  vim.cmd("edit " .. meta.file)
+  vim.schedule(function()
+    vim.api.nvim_win_set_cursor(0, { meta.line or 0, meta.column or 0 })
+  end)
+end
+
+local function go_to_exception(layout, exception)
+  local stack = exception["stack-trace"]
+  if not stack or stack == vim.NIL then
+    return
+  end
+
+  -- This will iterate over all the frames in a stack trace until a frame points to
+  -- a line/file/symbol that is within the project classpath and cwd.
+  --
+  -- This is a bit hacky as it involves many sequential evals, but it's quick and
+  -- dirty and it works.
+  --
+  -- Future implementation should probably do all this work in clojure land over a
+  -- single eval
+  for _, frame in ipairs(stack) do
+    local symbol = frame.names[1]
+    local line = frame.line
+    if symbol then
+      local meta = eval.eval(eval.API.resolve_metadata_for_symbol, "'" .. symbol)
+      if meta and meta ~= vim.NIL then
+        layout:unmount()
+        vim.cmd("edit " .. meta.file)
+        vim.schedule(function()
+          vim.api.nvim_win_set_cursor(0, { line or meta.line or 0, meta.column or 0 })
+        end)
+        return
+      end
+    end
+  end
+end
+
 -- This function is called when <Cr> is pressed while on a node in the report
 -- tree.
 --
@@ -11,46 +55,21 @@ local nio = require("nio")
 -- of nodes
 local function handle_on_enter(layout, node)
   nio.run(function()
-    local symbol
-    local line
-    local col
-
     if node.test then
-      symbol = node.test
+      return go_to_test(layout, node.test)
     end
 
-    local exception
     if node.assertion then
       if node.assertion.exception then
-        exception = node.assertion.exception[#node.assertion.exception]
-      else
-        symbol = node.test
+        return go_to_exception(layout, node.assertion.exception[#node.assertion.exception])
       end
+
+      return go_to_test(layout, node.test)
     end
 
     if node.exception then
-      exception = node.exception
+      return go_to_exception(layout, node.exception)
     end
-
-    if exception and exception["stack-trace"] ~= vim.NIL then
-      symbol = exception["stack-trace"][1].names[1]
-      line = exception["stack-trace"][1].line
-    end
-
-    if not symbol then
-      return
-    end
-
-    local meta = eval.eval(eval.API.resolve_metadata_for_symbol, "'" .. symbol)
-    if not meta then
-      return
-    end
-
-    layout:unmount()
-    vim.cmd("edit " .. meta.file)
-    vim.schedule(function()
-      vim.api.nvim_win_set_cursor(0, { line or meta.line or 0, col or meta.column or 0 })
-    end)
   end)
 end
 
