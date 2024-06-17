@@ -25,8 +25,9 @@
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn load-test-namespaces []
-  (doseq [namespace (api.query/get-test-namespaces)]
-    (require namespace)))
+  (with-json-out
+    (doseq [namespace (api.query/get-test-namespaces)]
+      (require namespace))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn run-test [test-sym]

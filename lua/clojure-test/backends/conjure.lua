@@ -15,8 +15,14 @@ function M.eval(ns, code, opts)
       context = ns,
       code = code,
       ["passive?"] = true,
-      ["on-result"] = function(result)
-        future.set(result)
+      cb = function(result)
+        if result.err then
+          vim.notify(result.err, vim.log.levels.ERROR)
+          future.set_error(result.err)
+        end
+        if result.value then
+          future.set(result.value)
+        end
       end,
     })
   end)

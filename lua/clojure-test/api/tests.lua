@@ -9,7 +9,9 @@ end, 3)
 local M = {}
 
 function M.load_tests()
+  vim.notify("Loading tests...", vim.log.levels.INFO)
   eval.eval(eval.API.load_test_namespaces)
+  vim.notify("Test namespaces loaded!", vim.log.levels.INFO)
 end
 
 function M.get_all_tests()
