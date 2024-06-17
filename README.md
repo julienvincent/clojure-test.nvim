@@ -30,8 +30,10 @@
 
 Note that currently this requires adding a companion dependency to your REPL:
 
+[![Clojars Project](https://img.shields.io/clojars/v/io.julienvincent/clojure-test.svg)](https://clojars.org/io.julienvincent/clojure-test)
+
 ```bash
-clojure -Sdeps '{:extra-deps {io.julienvincent/clojure-test {:mvn/version "0.0.1"} nrepl/nrepl {:mvn/version "1.0.0"} cider/cider-nrepl {:mvn/version "0.28.5"}}}' \
+clojure -Sdeps '{:extra-deps {io.julienvincent/clojure-test {:mvn/version "RELEASE"}}}' \
  -m nrepl.cmdline \
  --middleware '[cider.nrepl/cider-middleware]'
 ```
