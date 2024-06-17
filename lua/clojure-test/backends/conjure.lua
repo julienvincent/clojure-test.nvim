@@ -8,6 +8,9 @@ function M.eval(ns, code, opts)
   local future = nio.control.future()
 
   vim.schedule(function()
+    local errors = {}
+    local value
+
     local client = require("conjure.client")
     local fn = require("conjure.eval")["eval-str"]
     client["with-filetype"]("clojure", fn, {
@@ -17,11 +20,24 @@ function M.eval(ns, code, opts)
       ["passive?"] = true,
       cb = function(result)
         if result.err then
-          vim.notify(result.err, vim.log.levels.ERROR)
-          future.set_error(result.err)
+          table.insert(errors, result.err)
         end
         if result.value then
-          future.set(result.value)
+          value = result.value
+        end
+
+        if result.status["eval-error"] then
+          vim.notify(table.concat(errors, "\n"), vim.log.levels.ERROR)
+          future.set_error("")
+        end
+
+        if result.status.done and not future.is_set() then
+          if not value then
+            vim.notify("No result received", vim.log.levels.ERROR)
+            future.set_error("")
+          else
+            future.set(value)
+          end
         end
       end,
     })
