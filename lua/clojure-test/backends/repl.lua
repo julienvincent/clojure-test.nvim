@@ -29,6 +29,27 @@ local function eval(client, api, ...)
   return json_decode(result)
 end
 
+local function parse_test_report(test, report)
+  local status = "passed"
+  local assertions = {}
+
+  for _, entry in ipairs(report) do
+    if entry.type == "error" or entry.type == "fail" then
+      status = "failed"
+      table.insert(assertions, entry)
+    end
+    if entry.type == "pass" then
+      table.insert(assertions, entry)
+    end
+  end
+
+  return {
+    test = test,
+    status = status,
+    assertions = assertions,
+  }
+end
+
 function M.create(client)
   local backend = {}
 
@@ -42,11 +63,12 @@ function M.create(client)
   end
 
   function backend:run_test(test)
-    return eval(client, API.run_test, "'" .. test)
+    local report = eval(client, API.run_test, "'" .. test)
+    return parse_test_report(test, report)
   end
 
   function backend:resolve_metadata_for_symbol(symbol)
-    return eval(API.resolve_metadata_for_symbol, "'" .. symbol)
+    return eval(client, API.resolve_metadata_for_symbol, "'" .. symbol)
   end
 
   return backend

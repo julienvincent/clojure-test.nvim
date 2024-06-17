@@ -108,16 +108,18 @@
   (let [meta-info (if (qualified-symbol? sym)
                     (meta (requiring-resolve sym))
                     {:file (namespace-to-file sym)})
-        relative-path (:file meta-info)
+        file-path (:file meta-info)
 
-        file-path
-        (some
-         (fn [classpath-dir]
-           (let [file (File. classpath-dir relative-path)]
-             (when (.exists file)
-               (.getAbsolutePath file))))
-         (get-classpath))]
+        absolute-path
+        (if (-> file-path (File.) .isAbsolute)
+          file-path
+          (some
+           (fn [classpath-dir]
+             (let [file (File. classpath-dir file-path)]
+               (when (.exists file)
+                 (.getAbsolutePath file))))
+           (get-classpath)))]
 
-    (when file-path
+    (when absolute-path
       (-> (select-keys meta-info [:line :column])
-          (assoc :file file-path)))))
+          (assoc :file absolute-path)))))

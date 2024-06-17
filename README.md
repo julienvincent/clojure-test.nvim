@@ -49,23 +49,15 @@ local clojure_test = require("clojure-test")
 clojure_test.setup({
   -- list of default keybindings
   keys = {
-    global = {
-      run_all_tests = "<localleader>ta",
-      run_tests = "<localleader>tr",
-      run_tests_in_ns = "<localleader>tn",
-      rerun_previous = "<localleader>tp",
-      load_test_namespaces = "<localleader>tl",
-    },
-
     ui = {
-      expand_node = "l",
-      collapse_node = "h",
-      go_to = "<Cr>",
+      expand_node = { "l", "<Right>" },
+      collapse_node = { "h", "<Left>" },
+      go_to = { "<Cr>", "gd" },
 
       cycle_focus_forwards = "<Tab>",
       cycle_focus_backwards = "<S-Tab>",
 
-      quit = { "<Esc>", "q" },
+      quit = { "q", "<Esc>" },
     },
   },
 
@@ -78,6 +70,20 @@ clojure_test.setup({
     end
   }
 })
+```
+
+## Usage
+
+Once installed you can call the various API methods to run and load tests or setup keybindings to do this for you.
+
+```lua
+local api = require("clojure-test.api")
+
+vim.keymap.set("n", "<localleader>ta", api.run_all_tests, { desc = "Run all tests" })
+vim.keymap.set("n", "<localleader>tr", api.run_tests, { desc = "Run tests" })
+vim.keymap.set("n", "<localleader>tn", api.run_tests_in_ns, { desc = "Run tests in a namespace" })
+vim.keymap.set("n", "<localleader>tp", api.rerun_previous, { desc = "Rerun the most recently run tests" })
+vim.keymap.set("n", "<localleader>tl", api.run_tests_in_ns, { desc = "Find and load test namespaces in classpath" })
 ```
 
 ## Reload namespaces before run

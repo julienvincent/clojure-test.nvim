@@ -1,4 +1,3 @@
-local exceptions = require("clojure-test.ui.exceptions")
 local config = require("clojure-test.config")
 local utils = require("clojure-test.utils")
 
@@ -40,9 +39,9 @@ local function assertion_to_line(assertion)
   return line
 end
 
-local function exception_to_nodes(exception)
+local function exceptions_to_nodes(exceptions)
   local nodes = {}
-  for _, ex in ipairs(exception) do
+  for _, ex in ipairs(exceptions) do
     local line = {
       NuiText(" ", "DiagnosticWarn"),
       NuiText(ex["class-name"], "TSException"),
@@ -60,7 +59,7 @@ end
 local function assertion_to_node(test, assertion)
   local line = assertion_to_line(assertion)
 
-  local children = exception_to_nodes(assertion.exception or {})
+  local children = exceptions_to_nodes(assertion.exceptions or {})
 
   local node = NuiTree.Node({
     line = line,
@@ -102,23 +101,12 @@ local function reports_to_nodes(reports)
   return nodes
 end
 
-local function write_clojure_to_buf(buf, contents)
-  vim.api.nvim_buf_set_option(buf, "filetype", "clojure")
-
-  local lines = {}
-  if contents then
-    lines = vim.split(contents, "\n")
-  end
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-end
-
 local M = {}
 
-function M.create_tree(layout, on_enter_cb)
-  local window = layout.windows.tree
-
+function M.create(window, on_event)
   local tree = NuiTree({
     winid = window.winid,
+    ns_id = "testns",
     nodes = {},
     prepare_node = function(node)
       local line = NuiLine()
@@ -142,6 +130,10 @@ function M.create_tree(layout, on_enter_cb)
       return line
     end,
   })
+
+  local ReportTree = {
+    tree = tree,
+  }
 
   local map_options = { noremap = true, nowait = true }
 
@@ -178,44 +170,28 @@ function M.create_tree(layout, on_enter_cb)
         return
       end
 
-      on_enter_cb(node)
+      on_event({
+        type = "go-to",
+        node = node,
+      })
     end, map_options)
   end
 
   local event = require("nui.utils.autocmd").event
-
   window:on({ event.CursorMoved }, function()
     local node = tree:get_node()
-
-    if node.assertion then
-      write_clojure_to_buf(layout.windows.left.bufnr, node.assertion.expected)
-
-      if node.assertion.exception then
-        layout:hide_left()
-        exceptions.render_exception_to_buf(layout.windows.right.bufnr, node.assertion.exception)
-      else
-        layout:show_left()
-        write_clojure_to_buf(layout.windows.right.bufnr, node.assertion.actual)
-      end
+    if not node then
+      return
     end
 
-    if node.exception then
-      write_clojure_to_buf(layout.windows.left.bufnr)
-
-      layout:hide_left()
-      exceptions.render_exception_to_buf(layout.windows.right.bufnr, { node.exception })
-    end
+    on_event({
+      type = "hover",
+      node = node,
+    })
   end, {})
 
-  local ReportTree = {
-    tree = tree,
-  }
-
-  function ReportTree:set_reports(reports)
+  function ReportTree:render_reports(reports)
     tree:set_nodes(reports_to_nodes(reports))
-  end
-
-  function ReportTree:render()
     tree:render()
   end
 

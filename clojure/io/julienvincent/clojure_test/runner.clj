@@ -44,18 +44,18 @@
    (pretty.exceptions/analyze-exception exception {})))
 
 (defn- parse-report [report]
-  (let [exception (when (instance? Throwable (:actual report))
-                    (parse-exception (:actual report)))
+  (let [exceptions (when (instance? Throwable (:actual report))
+                     (parse-exception (:actual report)))
 
         report (cond-> (select-keys report [:type])
                  (:expected report)
                  (assoc :expected (parse-diff (:expected report)))
 
                  (and (:actual report)
-                      (not exception))
+                      (not exceptions))
                  (assoc :actual (parse-diff (:actual report)))
 
-                 exception (assoc :exception exception))]
+                 exceptions (assoc :exceptions exceptions))]
 
     (assoc report :context test/*testing-contexts*)))
 

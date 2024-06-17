@@ -1,7 +1,7 @@
+local FloatLayout = require("clojure-test.ui.layout.float")
+
 local config = require("clojure-test.config")
 local utils = require("clojure-test.utils")
-local Layout = require("nui.layout")
-local Popup = require("nui.popup")
 
 local M = {}
 
@@ -41,13 +41,7 @@ local function cycle_focus(layout, direction)
   vim.api.nvim_set_current_win(window.winid)
 end
 
-local function setup_quit_bindings(popup, layout)
-  for _, chord in ipairs(utils.into_table(config.keys.ui.quit)) do
-    popup:map("n", chord, function()
-      layout:unmount()
-    end, { noremap = true })
-  end
-
+local function setup_bindings(popup, layout, on_event)
   for _, chord in ipairs(utils.into_table(config.keys.ui.cycle_focus_forwards)) do
     popup:map("n", chord, function()
       cycle_focus(layout, 1)
@@ -59,102 +53,48 @@ local function setup_quit_bindings(popup, layout)
       cycle_focus(layout, -1)
     end, { noremap = true })
   end
+
+  local event = require("nui.utils.autocmd").event
+  popup:on({ event.WinLeave }, function()
+    vim.schedule(function()
+      local currently_focused_window = vim.api.nvim_get_current_win()
+      local found = false
+      for _, win in pairs(layout.windows) do
+        if win.winid == currently_focused_window then
+          found = true
+        end
+      end
+
+      if found then
+        return
+      end
+
+      on_event({
+        type = "on-focus-lost",
+      })
+    end)
+  end, {})
 end
 
-function M.create_test_layout()
-  local top_left_popup = Popup({
-    border = {
-      style = "rounded",
-      text = {
-        top = " Expected ",
-        top_align = "left",
-      },
-    },
-  })
-  local top_right_popup = Popup({
-    border = {
-      style = "rounded",
-      text = {
-        top = " Result ",
-        top_align = "left",
-      },
-    },
-  })
-
-  local report_popup = Popup({
-    border = {
-      style = "rounded",
-      text = {
-        top = " Report ",
-        top_align = "left",
-      },
-    },
-    enter = true,
-    focusable = true,
-  })
-
-  local layout_side_by_side = Layout.Box({
-    Layout.Box({
-      Layout.Box(top_left_popup, { grow = 1 }),
-      Layout.Box(top_right_popup, { grow = 1 }),
-    }, { dir = "row", size = "70%" }),
-
-    Layout.Box(report_popup, { size = "30%" }),
-  }, { dir = "col" })
-
-  local layout_single = Layout.Box({
-    Layout.Box({
-      Layout.Box(top_right_popup, { grow = 1 }),
-    }, { dir = "row", size = "70%" }),
-
-    Layout.Box(report_popup, { size = "30%" }),
-  }, { dir = "col" })
-
-  local layout = Layout({
-    position = "50%",
-    relative = "editor",
-    size = {
-      width = 150,
-      height = 60,
-    },
-  }, layout_side_by_side)
-
-  local TestLayout = {
-    layout = layout,
-
-    windows = {
-      tree = report_popup,
-      left = top_left_popup,
-      right = top_right_popup,
-    },
-
-    last_active_window = vim.api.nvim_get_current_win(),
-  }
-
-  function TestLayout:mount()
-    layout:mount()
+function M.create(on_event)
+  local layout_fn = FloatLayout
+  if config.layout.style == "float" then
+    layout_fn = FloatLayout
   end
 
-  function TestLayout:hide_left()
-    top_left_popup:hide()
-    layout:update(layout_single)
+  local layout = layout_fn()
+
+  function layout:map(mode, chord, fn, opts)
+    layout.windows.tree:map(mode, chord, fn, opts)
+    layout.windows.left:map(mode, chord, fn, opts)
+    layout.windows.right:map(mode, chord, fn, opts)
   end
 
-  function TestLayout:show_left()
-    top_left_popup:show()
-    layout:update(layout_side_by_side)
-  end
+  setup_bindings(layout.windows.tree, layout, on_event)
+  setup_bindings(layout.windows.left, layout, on_event)
+  setup_bindings(layout.windows.right, layout, on_event)
 
-  function TestLayout:unmount()
-    layout:unmount()
-    vim.api.nvim_set_current_win(TestLayout.last_active_window)
-  end
-
-  setup_quit_bindings(report_popup, TestLayout)
-  setup_quit_bindings(top_left_popup, TestLayout)
-  setup_quit_bindings(top_right_popup, TestLayout)
-
-  return TestLayout
+  return layout
 end
 
 return M

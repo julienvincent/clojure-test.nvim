@@ -5,7 +5,10 @@ local function get_node_at_cursor()
   local cursor_range = { cursor[1] - 1, cursor[2] }
 
   local buf = vim.api.nvim_win_get_buf(0)
-  if vim.api.nvim_buf_get_option(buf, "ft") ~= "clojure" then
+  local filetype = vim.api.nvim_get_option_value("ft", {
+    buf = buf,
+  })
+  if filetype ~= "clojure" then
     return
   end
 

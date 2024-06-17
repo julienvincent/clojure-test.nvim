@@ -2,24 +2,20 @@ local backends = require("clojure-test.backends")
 local clients = require("clojure-test.clients")
 
 local M = {
-  keys = {
-    global = {
-      run_all_tests = "<localleader>ta",
-      run_tests = "<localleader>tr",
-      run_tests_in_ns = "<localleader>tn",
-      rerun_previous = "<localleader>tp",
-      load_test_namespaces = "<localleader>tl",
-    },
+  layout = {
+    style = "float",
+  },
 
+  keys = {
     ui = {
-      expand_node = "l",
-      collapse_node = "h",
-      go_to = "<Cr>",
+      expand_node = { "l", "<Right>" },
+      collapse_node = { "h", "<Left>" },
+      go_to = { "<Cr>", "gd" },
 
       cycle_focus_forwards = "<Tab>",
       cycle_focus_backwards = "<S-Tab>",
 
-      quit = { "<Esc>", "q" },
+      quit = { "q", "<Esc>" },
     },
   },
 

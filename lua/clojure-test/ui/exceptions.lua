@@ -5,8 +5,10 @@ local NuiText = require("nui.text")
 
 local M = {}
 
-function M.render_exception_to_buf(buf, exception_chain)
-  vim.api.nvim_buf_set_option(buf, "filetype", "clojure")
+function M.render_exceptions_to_buf(buf, exception_chain)
+  vim.api.nvim_set_option_value("filetype", "clojure", {
+    buf = buf,
+  })
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
 
   local lines = {}
