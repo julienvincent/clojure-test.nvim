@@ -1,5 +1,4 @@
 local eval = require("clojure-test.api.eval")
-local utils = require("clojure-test.utils")
 local nio = require("nio")
 
 local select = nio.wrap(function(choices, opts, cb)
@@ -22,12 +21,8 @@ function M.get_all_tests()
   return tests
 end
 
-function M.select_tests(current_test)
+function M.select_tests()
   local tests = M.get_all_tests()
-
-  if current_test and utils.included_in_table(tests, current_test) then
-    return { current_test }
-  end
 
   local test = select(tests, { prompt = "Select test" })
   if not test then
@@ -36,14 +31,10 @@ function M.select_tests(current_test)
   return { test }
 end
 
-function M.select_namespaces(current_namespace)
+function M.select_namespaces()
   local namespaces = eval.eval(eval.API.get_test_namespaces)
   if not namespaces then
     return {}
-  end
-
-  if current_namespace and utils.included_in_table(namespaces, current_namespace) then
-    return { current_namespace }
   end
 
   local namespace = select(namespaces, { prompt = "Select namespace" })

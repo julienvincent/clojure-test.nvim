@@ -23,10 +23,18 @@ end
 function M.run_tests()
   nio.run(function()
     local current_test = location.get_test_at_cursor()
-    local tests = tests_api.select_tests(current_test)
+
+    local tests
+    if current_test then
+      tests = { current_test }
+    else
+      tests = tests_api.select_tests()
+    end
+
     if #tests == 0 then
       return
     end
+
     M.state.previous = tests
     run_api.run_tests(tests)
   end)
@@ -34,23 +42,26 @@ end
 
 function M.run_tests_in_ns()
   nio.run(function()
+    local namespaces
     local current_namespace = location.get_current_namespace()
-
-    local namespaces = tests_api.select_namespaces(current_namespace)
-    if #namespaces == 0 then
-      return
+    if current_namespace then
+      namespaces = { current_namespace }
+    else
+      namespaces = tests_api.select_namespaces()
     end
+
     local tests = {}
     for _, namespace in ipairs(namespaces) do
-      print(namespace)
       local ns_tests = tests_api.get_tests_in_ns(namespace)
       for _, test in ipairs(ns_tests) do
         table.insert(tests, test)
       end
     end
+
     if #tests == 0 then
       return
     end
+
     M.state.previous = tests
     run_api.run_tests(tests)
   end)
