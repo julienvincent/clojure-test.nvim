@@ -1,6 +1,34 @@
-local ts = require("nvim-treesitter.ts_utils")
-
 local M = {}
+
+local function get_node_at_cursor()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local cursor_range = { cursor[1] - 1, cursor[2] }
+
+  local buf = vim.api.nvim_win_get_buf(0)
+  if vim.api.nvim_buf_get_option(buf, "ft") ~= "clojure" then
+    return
+  end
+
+  local root_lang_tree = vim.treesitter.get_parser(buf, "clojure")
+  if not root_lang_tree then
+    return
+  end
+
+  local root
+  for _, tree in pairs(root_lang_tree:trees()) do
+    local tree_root = tree:root()
+    if tree_root and vim.treesitter.is_in_node_range(tree_root, cursor_range[1], cursor_range[2]) then
+      root = tree_root
+      break
+    end
+  end
+
+  if not root then
+    return
+  end
+
+  return root:named_descendant_for_range(cursor_range[1], cursor_range[2], cursor_range[1], cursor_range[2])
+end
 
 local function extract_ns_name(node)
   if not node then
@@ -29,7 +57,7 @@ local function extract_ns_name(node)
 end
 
 function M.get_current_namespace()
-  local node = ts.get_node_at_cursor()
+  local node = get_node_at_cursor()
   if not node then
     return
   end
@@ -49,7 +77,7 @@ function M.get_current_namespace()
 end
 
 function M.get_test_at_cursor()
-  local node = ts.get_node_at_cursor()
+  local node = get_node_at_cursor()
   if not node then
     return
   end
