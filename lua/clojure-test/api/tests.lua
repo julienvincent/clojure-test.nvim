@@ -1,4 +1,5 @@
-local eval = require("clojure-test.api.eval")
+local config = require("clojure-test.config")
+local utils = require("clojure-test.utils")
 local nio = require("nio")
 
 local select = nio.wrap(function(choices, opts, cb)
@@ -9,21 +10,28 @@ local M = {}
 
 function M.load_tests()
   vim.notify("Loading tests...", vim.log.levels.INFO)
-  eval.eval(eval.API.load_test_namespaces)
+  config.backend:load_test_namespaces()
   vim.notify("Test namespaces loaded!", vim.log.levels.INFO)
 end
 
 function M.get_all_tests()
-  local tests = eval.eval(eval.API.get_all_tests)
-  if not tests then
-    return {}
+  return config.backend:get_tests()
+end
+
+function M.get_test_namespaces()
+  local tests = M.get_all_tests()
+  local namespaces = {}
+  for _, test in ipairs(tests) do
+    local parsed = utils.parse_test(test)
+    if not utils.included_in_table(namespaces, parsed.ns) then
+      table.insert(namespaces, parsed.ns)
+    end
   end
-  return tests
+  return namespaces
 end
 
 function M.select_tests()
   local tests = M.get_all_tests()
-
   local test = select(tests, { prompt = "Select test" })
   if not test then
     return {}
@@ -32,11 +40,7 @@ function M.select_tests()
 end
 
 function M.select_namespaces()
-  local namespaces = eval.eval(eval.API.get_test_namespaces)
-  if not namespaces then
-    return {}
-  end
-
+  local namespaces = M.get_test_namespaces()
   local namespace = select(namespaces, { prompt = "Select namespace" })
   if not namespace then
     return {}
@@ -45,11 +49,11 @@ function M.select_namespaces()
 end
 
 function M.get_tests_in_ns(namespace)
-  local tests = eval.eval(eval.API.get_tests_in_ns, "'" .. namespace)
-  if not tests then
-    return {}
-  end
-  return tests
+  local tests = M.get_all_tests()
+  return vim.tbl_filter(function(test)
+    local parsed = utils.parse_test(test)
+    return parsed.ns == namespace
+  end, tests)
 end
 
 return M

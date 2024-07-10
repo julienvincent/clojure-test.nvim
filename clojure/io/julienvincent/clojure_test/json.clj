@@ -9,12 +9,12 @@
      (json/write-value-as-string res# (json/object-mapper {:pretty true}))))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
-(defn get-test-namespaces []
+(defn ^:deprecated get-test-namespaces []
   (with-json-out
     (api.query/get-test-namespaces)))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
-(defn get-tests-in-ns [namespace]
+(defn ^:deprecated get-tests-in-ns [namespace]
   (with-json-out
     (api.query/get-tests-in-ns namespace)))
 

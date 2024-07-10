@@ -28,4 +28,16 @@ function M.into_table(value)
   return { value }
 end
 
+function M.parse_test(test)
+    local parts = vim.split(test, "/")
+    return {
+      ns = parts[1],
+      name = parts[2],
+    }
+end
+
+function M.parse_tests(tests)
+  return vim.tbl_map(M.parse_test, tests)
+end
+
 return M

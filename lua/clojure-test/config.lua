@@ -1,4 +1,5 @@
 local backends = require("clojure-test.backends")
+local clients = require("clojure-test.clients")
 
 local M = {
   keys = {
@@ -24,7 +25,7 @@ local M = {
 
   hooks = {},
 
-  backend = backends.conjure,
+  backend = backends.repl.create(clients.conjure),
 }
 
 function M.update_config(new_config)

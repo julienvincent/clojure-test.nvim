@@ -1,11 +1,10 @@
 local parser = require("clojure-test.api.report")
 local config = require("clojure-test.config")
-local eval = require("clojure-test.api.eval")
 local ui = require("clojure-test.ui")
 local nio = require("nio")
 
 local function go_to_test(layout, test)
-  local meta = eval.eval(eval.API.resolve_metadata_for_symbol, "'" .. test)
+  local meta = config.backend:resolve_metadata_for_symbol(test)
   if not meta then
     return
   end
@@ -35,7 +34,7 @@ local function go_to_exception(layout, exception)
     local symbol = frame.names[1]
     local line = frame.line
     if symbol then
-      local meta = eval.eval(eval.API.resolve_metadata_for_symbol, "'" .. symbol)
+      local meta = config.backend:resolve_metadata_for_symbol(symbol)
       if meta and meta ~= vim.NIL then
         layout:unmount()
         vim.cmd("edit " .. meta.file)
@@ -102,7 +101,7 @@ function M.run_tests(tests)
   for _, test in ipairs(tests) do
     nio.run(function()
       semaphore.with(function()
-        local report = eval.eval(eval.API.run_test, "'" .. test)
+        local report = config.backend:run_test(test)
         if report then
           queue.put({
             test = test,
