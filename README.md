@@ -10,6 +10,28 @@
 
 ---
 
+![clojure-test-example](https://github.com/user-attachments/assets/231b8ff4-9402-4f22-b313-7c7b21fe6ae3)
+
+This is a plugin to make working with Clojure tests within Neovim a lot more user-friendly. Here are some of the
+features:
+
++ Interactively run tests from anywhere in the project
+  + Provides selection UI's for picking namespaces or individual tests
++ Easily re-run previous or failing tests without having to navigate back to test namespaces
++ Provide a more human-readable interface
++ Render exceptions in a more human friendly manner
++ Allow go-to-definition on test reports
+  + Go to where an exception was thrown
+  + Go to failing tests
++ Allow running hooks before executing tests
+  + Save files and or reload changed namespaces
+
+See the [feature demo](#feature-demo) for a quick overview.
+
+> [!WARNING]
+>
+> This is **very alpha software**. It's built for my personal use, and I am developing it out as I go. Use at your own
+> risk.
 
 ## Installation
 
@@ -20,27 +42,59 @@
   "julienvincent/clojure-test.nvim",
   config = function()
     require("clojure-test").setup()
-  end,
-  dependencies = {
-    { "nvim-neotest/nvim-nio" },
-    { "MunifTanjim/nui.nvim" }
-  }
+  end
 }
 ```
 
-Note that currently this requires adding a companion dependency to your REPL:
+#### Neovim Dependencies
+
++ [nui.nvim](https://github.com/MunifTanjim/nui.nvim)
++ [nvim-nio](https://github.com/nvim-neotest/nvim-nio)
+
+#### Clojure Dependencies
 
 [![Clojars Project](https://img.shields.io/clojars/v/io.julienvincent/clojure-test.svg)](https://clojars.org/io.julienvincent/clojure-test)
 
-```bash
-clojure -Sdeps '{:extra-deps {io.julienvincent/clojure-test {:mvn/version "RELEASE"}}}' \
- -m nrepl.cmdline \
- --middleware '[cider.nrepl/cider-middleware]'
+> [!NOTE]
+>
+> This plugin currently requires the `io.julienvincent/clojure-test` companion clojure dependency to be available on
+> your classpath.
+
+Configure an alias in the project or user level deps.edn file to include the appropriate dependencies. For example you
+could modify your `$XDG_CONFIG_HOME/clojure/deps.edn` or `$HOME/.clojure/deps.edn` file as follows:
+
+```clojure
+{:aliases
+ {:nrepl {:extra-deps {;; Assuming you already have something like this
+                       nrepl/nrepl {:mvn/version "1.0.0"}
+                       cider/cider-nrepl {:mvn/version "0.42.1"}
+
+                       ;; Add the companion dependency
+                       io.julienvincent/clojure-test {:mvn/version "RELEASE"}}
+          :main-opts  ["--main" "nrepl.cmdline"
+                       "--middleware" "[cider.nrepl/cider-middleware]"
+                       "--interactive"]}}}
 ```
 
-## Project Status
+Or alternatively you can include them inline with the following `clojure` command
 
-This is **very alpha software**. It's built for my personal use, and I am developing it out as I go. Use at your own risk.
+```bash
+clojure -Sdeps '{:deps {nrepl/nrepl {:mvn/version "1.0.0"}
+                        cider/cider-nrepl {:mvn/version "0.28.5"}
+                        io.julienvincent/clojure-test {:mvn/version "RELEASE"}}}' \
+        -M -m nrepl.cmdline \
+        --middleware '[cider.nrepl/cider-middleware]'
+```
+
+---
+
+#### Why the Clojure dependency?
+
+This plugin currently requires executing a lot of logic on the Clojure side, and it needs to format/parse input and
+output in a way that is easily compatible with the Lua plugin - which requires other transient dependencies.
+
+I would like for a future version of this plugin to not require this companion dependency but for the moment it is the
+simplest approach.
 
 ## Configuration
 
@@ -74,7 +128,7 @@ clojure_test.setup({
 
 ## Usage
 
-Once installed you can call the various API methods to run and load tests or setup keybindings to do this for you.
+Once installed you can call the various API methods to run and load tests or setup key bindings to do this for you.
 
 ```lua
 local api = require("clojure-test.api")
@@ -85,6 +139,10 @@ vim.keymap.set("n", "<localleader>tn", api.run_tests_in_ns, { desc = "Run tests 
 vim.keymap.set("n", "<localleader>tp", api.rerun_previous, { desc = "Rerun the most recently run tests" })
 vim.keymap.set("n", "<localleader>tl", api.run_tests_in_ns, { desc = "Find and load test namespaces in classpath" })
 ```
+
+## Feature Demo
+
+![clojure-test-demo](https://github.com/user-attachments/assets/d54338b6-de25-4b10-a613-2ec9ee4b984b)
 
 ## Reload namespaces before run
 
