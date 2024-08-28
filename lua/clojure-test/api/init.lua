@@ -1,6 +1,7 @@
 local location = require("clojure-test.api.location")
 local tests_api = require("clojure-test.api.tests")
 local run_api = require("clojure-test.api.run")
+local utils = require("clojure-test.utils")
 local nio = require("nio")
 
 local M = {}
@@ -44,7 +45,8 @@ function M.run_tests_in_ns()
   nio.run(function()
     local namespaces
     local current_namespace = location.get_current_namespace()
-    if current_namespace then
+    local test_namespaces = tests_api.get_test_namespaces()
+    if current_namespace and utils.included_in_table(test_namespaces, current_namespace) then
       namespaces = { current_namespace }
     else
       namespaces = tests_api.select_namespaces()
