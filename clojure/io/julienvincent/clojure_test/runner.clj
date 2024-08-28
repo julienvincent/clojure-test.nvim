@@ -23,7 +23,8 @@
       remove-commas))
 
 (defn- parse-diff [diff]
-  (when-let [mc (requiring-resolve 'matcher-combinators.config/disable-ansi-color!)]
+  (when-let [mc (try (requiring-resolve 'matcher-combinators.config/disable-ansi-color!)
+                     (catch Exception _))]
     (mc))
 
   (cond
