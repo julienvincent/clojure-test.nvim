@@ -32,13 +32,17 @@ local function go_to_exception(target_window, exception)
   for _, frame in ipairs(stack) do
     local symbol = frame.names[1]
     local line = frame.line
+    if line == vim.NIL then
+      line = nil
+    end
+
     if symbol then
       local meta = config.backend:resolve_metadata_for_symbol(symbol)
       if meta and meta ~= vim.NIL then
         vim.api.nvim_set_current_win(target_window)
         vim.cmd("edit " .. meta.file)
         vim.schedule(function()
-          vim.api.nvim_win_set_cursor(0, { line or meta.line or 0, meta.column or 0 })
+          vim.api.nvim_win_set_cursor(0, { line or meta.line or 1, meta.column or 0 })
         end)
         return
       end
