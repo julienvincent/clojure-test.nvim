@@ -50,6 +50,7 @@ See the [feature demo](#feature-demo) for a quick overview.
 
 + [nui.nvim](https://github.com/MunifTanjim/nui.nvim)
 + [nvim-nio](https://github.com/nvim-neotest/nvim-nio)
++ [conjure](https://github.com/olical/conjure) [semi-optional]
 
 #### Clojure Dependencies
 
@@ -171,3 +172,31 @@ require("clojure-test").setup({
   }
 })
 ```
+
+## Architecture
+
+This is still TBD
+
+## Custom Backends
+
+This plugin uses a configurable backend protocol to communicate with the Clojure nREPL server. This backend is
+responsible for performing discovery of test namespaces and tests, as well as executing these tests and providing back
+the test reports.
+
+By default, clojure-test is configured to use a built-in [Conjure](https://github.com/olical/conjure) REPL backend. You
+can find the relevant implementations
+[here](https://github.com/julienvincent/clojure-test.nvim/blob/master/lua/clojure-test/backends/repl.lua) and
+[here](https://github.com/julienvincent/clojure-test.nvim/blob/master/lua/clojure-test/clients/conjure.lua).
+
+As an example, here is how the default backend is configured:
+
+```lua
+local backends = require("clojure-test.backends")
+local clients = require("clojure-test.clients")
+
+require("clojure-test").setup({
+  backend = backends.repl.create(clients.conjure),
+})
+```
+
+Or you can implement your own backend.
