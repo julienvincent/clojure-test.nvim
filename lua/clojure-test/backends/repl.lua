@@ -7,6 +7,7 @@ local API = {
   run_test = "io.julienvincent.clojure-test.json/run-test",
 
   resolve_metadata_for_symbol = "io.julienvincent.clojure-test.json/resolve-metadata-for-symbol",
+  analyze_exception = "io.julienvincent.clojure-test.json/analyze-exception",
 }
 
 local function statement(api, ...)
@@ -69,6 +70,10 @@ function M.create(client)
 
   function backend:resolve_metadata_for_symbol(symbol)
     return eval(client, API.resolve_metadata_for_symbol, "'" .. symbol)
+  end
+
+  function backend:analyze_exception(symbol)
+    return eval(client, API.analyze_exception, "'" .. symbol)
   end
 
   return backend

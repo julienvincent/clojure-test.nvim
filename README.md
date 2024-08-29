@@ -138,7 +138,8 @@ vim.keymap.set("n", "<localleader>ta", api.run_all_tests, { desc = "Run all test
 vim.keymap.set("n", "<localleader>tr", api.run_tests, { desc = "Run tests" })
 vim.keymap.set("n", "<localleader>tn", api.run_tests_in_ns, { desc = "Run tests in a namespace" })
 vim.keymap.set("n", "<localleader>tp", api.rerun_previous, { desc = "Rerun the most recently run tests" })
-vim.keymap.set("n", "<localleader>tl", api.run_tests_in_ns, { desc = "Find and load test namespaces in classpath" })
+vim.keymap.set("n", "<localleader>tl", api.load_tests, { desc = "Find and load test namespaces in classpath" })
+vim.keymap.set("n", "<localleader>!", function() api.analyze_exception("*e") end, { desc = "Inspect the most recent exception" })
 ```
 
 ## Feature Demo

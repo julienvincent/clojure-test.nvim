@@ -2,6 +2,7 @@
   (:require
    [io.julienvincent.clojure-test.query :as api.query]
    [io.julienvincent.clojure-test.runner :as api.runner]
+   [io.julienvincent.clojure-test.serialization :as api.serialization]
    [jsonista.core :as json]))
 
 (defmacro ^:private with-json-out [& body]
@@ -38,3 +39,8 @@
 (defn resolve-metadata-for-symbol [sym]
   (with-json-out
     (api.query/resolve-metadata-for-symbol sym)))
+
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn analyze-exception [sym]
+  (with-json-out
+    (api.serialization/analyze-exception (var-get (resolve sym)))))

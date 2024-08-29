@@ -1,5 +1,7 @@
+local config = require("clojure-test.config")
 local utils = require("clojure-test.utils")
 
+local NuiPopup = require("nui.popup")
 local NuiLine = require("nui.line")
 local NuiText = require("nui.text")
 
@@ -63,6 +65,34 @@ function M.render_exceptions_to_buf(buf, exception_chain)
   for i, line in ipairs(lines) do
     line:render(buf, -1, i)
   end
+end
+
+function M.open_exception_popup()
+  local popup = NuiPopup({
+    border = {
+      style = "rounded",
+      text = {
+        top = " Exception ",
+      },
+    },
+    position = "50%",
+    relative = "editor",
+    enter = true,
+    size = {
+      width = 120,
+      height = 30,
+    },
+  })
+
+  for _, chord in ipairs(utils.into_table(config.keys.ui.quit)) do
+    popup:map("n", chord, function()
+      popup:unmount()
+    end, { noremap = true })
+  end
+
+  popup:mount()
+
+  return popup
 end
 
 return M

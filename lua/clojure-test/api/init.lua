@@ -1,3 +1,4 @@
+local exceptions_api = require("clojure-test.api.exceptions")
 local location = require("clojure-test.api.location")
 local tests_api = require("clojure-test.api.tests")
 local run_api = require("clojure-test.api.run")
@@ -81,6 +82,12 @@ end
 function M.load_tests()
   nio.run(function()
     tests_api.load_tests()
+  end)
+end
+
+function M.analyze_exception(sym)
+  nio.run(function()
+    exceptions_api.render_exception(sym)
   end)
 end
 
