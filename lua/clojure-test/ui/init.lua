@@ -25,6 +25,13 @@ local function handle_on_move(UI, event)
   if node.assertion then
     if node.assertion.exceptions then
       vim.schedule(function()
+        if node.assertion.expected then
+          layout:render_double()
+          write_clojure_to_buf(layout.windows.left.bufnr, node.assertion.expected)
+          exceptions.render_exceptions_to_buf(layout.windows.right.bufnr, node.assertion.exceptions)
+          return
+        end
+
         layout:render_single()
         exceptions.render_exceptions_to_buf(layout.windows.right.bufnr, node.assertion.exceptions)
       end)
