@@ -40,7 +40,7 @@
            location (some (fn [sym]
                             (when sym
                               (query/resolve-metadata-for-symbol sym)))
-                          [package frame-name])]
+                          [frame-name package])]
        (assoc frame :location location)))
    stack-trace))
 

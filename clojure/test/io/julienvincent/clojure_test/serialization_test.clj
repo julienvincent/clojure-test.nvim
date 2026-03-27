@@ -1,10 +1,11 @@
 (ns io.julienvincent.clojure-test.serialization-test
   (:require
-   [io.julienvincent.clojure-test.test.example :as test.example]
-   [matcher-combinators.test]
-   [matcher-combinators.matchers :as m]
+   [clojure.test :refer [deftest is]]
    [io.julienvincent.clojure-test.serialization :as serialization]
-   [clojure.test :refer [deftest is]]))
+   [io.julienvincent.clojure-test.test.example :as test.example]
+   [io.julienvincent.clojure-test.test.example.child-module :as test.example.child-module]
+   [matcher-combinators.matchers :as m]
+   [matcher-combinators.test]))
 
 (deftest analyze-exception-test
   (try
@@ -44,4 +45,31 @@
                                 :names
                                 ["io.julienvincent.clojure-test.test.example"
                                  "throws"]}])}]
+                  (serialization/analyze-exception ex))))))
+
+(deftest analyze-exception-child-module-test
+  (try
+    (test.example.child-module/throws)
+    (is false "Should never reach here")
+    (catch Exception ex
+      (is (match? [{:class-name "clojure.lang.ExceptionInfo"
+                    :message "Thrown from child module"
+                    :properties "{:sum 2}\n"
+                    :stack-trace
+                    (m/prefix [{:simple-class "child_module$throws"
+                                :package "io.julienvincent.clojure_test.test.example"
+                                :is-clojure? true
+                                :method "invokeStatic"
+                                :name
+                                "io.julienvincent.clojure-test.test.example.child-module/throws"
+                                :file "child_module.clj"
+                                :line 5
+                                :id
+                                "io.julienvincent.clojure-test.test.example.child-module/throws:5"
+                                :class
+                                "io.julienvincent.clojure_test.test.example.child_module$throws"
+                                :location {:file #".*/clojure/test/io/julienvincent/clojure_test/test/example/child_module.clj"}
+                                :names ["io.julienvincent.clojure-test.test.example.child-module"
+                                        "throws"]}])}]
+
                   (serialization/analyze-exception ex))))))
